@@ -26,7 +26,11 @@
 		<h2 class="mt-4 text-2xl">Introduction</h2>
 		<p>
 			<a href="https://bgp.tools/as/215172" class="underline">AS 215172</a> is operated by
-			<a href="https://jhl.hk" class="underline">Jianyue Hugo Liang</a>.
+			<a href="https://jhl.hk" class="underline">Jianyue Hugo Liang</a>, for learning and testing purpose.
+		</p>
+		<p>
+			<a href="#" class="underline">Waiting for ASN Assignment</a> is operated by
+			<a href="https://jhl.hk" class="underline">Jianyue Hugo Liang</a>, for business purpose.
 		</p>
 
 		<h2 class="mt-4 text-2xl">Locations</h2>
