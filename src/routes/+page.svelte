@@ -10,7 +10,8 @@
 		{ name: 'The Constant Company, LLC', asn: 20473 },
 		{ name: 'MoeDove LLC', asn: 44324 },
 		{ name: 'Rui Feng', asn: 211575 },
-		{ name: 'Liu HaoRan', asn: 154185 }
+		{ name: 'Liu HaoRan', asn: 154185 },
+		{ name: 'Yijia Xu', asn: 210352 }
 	];
 </script>
 
@@ -33,6 +34,7 @@
 		<ul class="list-disc">
 			<li>Tokyo, Japan</li>
 			<li>Osaka, Japan</li>
+			<li>Frankfurt, Germany</li>
 		</ul>
 
 		<h2 class="mt-4 text-2xl">Upstreams</h2>
