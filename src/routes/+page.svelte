@@ -1,17 +1,12 @@
 <script>
+	const ix = [
+		{ id: 3911, name: "BGP.Exchange", location: "Tokyo, Japan"}
+	]
+
 	const upstream = [
 		{ name: 'Liu HaoRan', asn: 213605 },
 		{ name: 'The Constant Company, LLC', asn: 20473 },
 		{ name: 'MoeDove LLC', asn: 44324 }
-	];
-
-	const peer = [
-		{ name: 'Liu HaoRan', asn: 213605 },
-		{ name: 'The Constant Company, LLC', asn: 20473 },
-		{ name: 'MoeDove LLC', asn: 44324 },
-		{ name: 'Rui Feng', asn: 211575 },
-		{ name: 'Liu HaoRan', asn: 154185 },
-		{ name: 'Yijia Xu', asn: 210352 }
 	];
 </script>
 
@@ -36,21 +31,25 @@
 
 		<h2 class="mt-4 text-2xl">Locations</h2>
 		<ul class="list-disc">
-			<li>Tokyo, Japan</li>
+			<li>Tokyo, Japan (Open to Peer)</li>
 			<li>Osaka, Japan</li>
+			<li>Kobe, Japan (Open to Peer)</li>
 			<li>Frankfurt, Germany</li>
+		</ul>
+
+		<h2 class="mt-4 text-2xl">Peer</h2>
+		<p>We have an open peering policy. You can peer with us through Internet eXchanges that we have in common, or individually.</p>
+
+		<h2 class="mt-4 text-2xl">Internet Exchange (IX)</h2>
+		<ul class="list-disc">
+			{#each ix as item (item.id)}
+				<li><a href="https://www.peeringdb.com/ix/{item.id}" class="underline">{item.name} | {item.location}</a></li>
+			{/each}
 		</ul>
 
 		<h2 class="mt-4 text-2xl">Upstreams</h2>
 		<ul class="list-disc">
 			{#each upstream as item (item.asn)}
-				<li><a href="https://bgp.tools/as/{item.asn}" class="underline">{item.name} (AS {item.asn})</a></li>
-			{/each}
-		</ul>
-
-		<h2 class="mt-4 text-2xl">Peers</h2>
-		<ul class="list-disc">
-			{#each peer as item (item.asn)}
 				<li><a href="https://bgp.tools/as/{item.asn}" class="underline">{item.name} (AS {item.asn})</a></li>
 			{/each}
 		</ul>
@@ -61,9 +60,6 @@
 			<li><a href="https://article.jhl.idv.hk" class="underline">Blogs</a></li>
 			<li><a href="https://jianyuelab.org" class="underline">JianyueLab</a></li>
 		</ul>
-
-		<h2 class="mt-4 text-2xl">Connectivity</h2>
-		<img src="https://bgp.tools/pathimg/215172-default?" alt="BGP Connectivity Map" class="w-auto" />
 
 		<footer class="my-4">
 			<p>Last Updated: 28-11-2025. IPv6 Supported.</p>
