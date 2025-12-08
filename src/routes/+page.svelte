@@ -21,12 +21,8 @@
 
 		<h2 class="mt-4 text-2xl">Introduction</h2>
 		<p>
-			<a href="https://bgp.tools/as/215172" class="underline">AS 215172</a> is operated by
-			<a href="https://jhl.hk" class="underline">Jianyue Hugo Liang</a>, for learning and testing purpose.
-		</p>
-		<p>
-			<a href="https://bgp.tools/as/203168" class="underline">AS 203168</a> is operated by
-			<a href="https://jhl.hk" class="underline">Janyue Aosugi</a>, for business purpose.
+			<a href="https://bgp.tools/as/215172" class="underline">AS 215172</a> and <a href="https://bgp.tools/as/203168" class="underline">AS 203168</a> are operated by
+			<a href="https://jhl.hk" class="underline">Jianyue Hugo Liang, a.k.a. Janyue Aosugi</a>, for learning and testing purpose.
 		</p>
 
 		<h2 class="mt-4 text-2xl">Locations</h2>
