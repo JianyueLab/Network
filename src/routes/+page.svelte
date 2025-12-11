@@ -28,13 +28,13 @@
 		<h2 class="mt-4 text-2xl">Locations</h2>
 		<ul class="list-disc">
 			<li>Tokyo, Japan (Open to Peer)</li>
-			<li>Osaka, Japan</li>
 			<li>Kobe, Japan (Open to Peer)</li>
-			<li>Frankfurt, Germany</li>
+			<li>Hong Kong (Open to Peer)</li>
+			<li>Singapore (Open to Peer</li>
 		</ul>
 
 		<h2 class="mt-4 text-2xl">Peer</h2>
-		<p>We have an open peering policy. You can peer with us through Internet eXchanges that we have in common, or individually.</p>
+		<p>We have an open peering policy. You can peer with us through Internet eXchanges that we have in common, or individually. Contact me for more information: <a href="mailto:ja@jhl.hk">ja@jhl.hk</a></p>
 
 		<h2 class="mt-4 text-2xl">Internet Exchange (IX)</h2>
 		<ul class="list-disc">
