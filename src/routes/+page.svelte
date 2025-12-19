@@ -17,24 +17,18 @@
 
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-16">
 	<div class="mx-auto max-w-3xl">
-		<h1 class="text-center text-4xl">AS 215172 | JianyueLab Network</h1>
-
-		<h2 class="mt-4 text-2xl">Introduction</h2>
-		<p>
-			<a href="https://bgp.tools/as/215172" class="underline">AS 215172</a> and <a href="https://bgp.tools/as/203168" class="underline">AS 203168</a> are operated by
-			<a href="https://jhl.hk" class="underline">Jianyue Hugo Liang, a.k.a. Janyue Aosugi</a>, for learning and testing purpose.
-		</p>
+		<h1 class="text-center text-4xl">AS 215172 | JianyueLab Ltd Network</h1>
 
 		<h2 class="mt-4 text-2xl">Locations</h2>
 		<ul class="list-disc">
 			<li>Tokyo, Japan (Open to Peer)</li>
 			<li>Kobe, Japan (Open to Peer)</li>
 			<li>Hong Kong (Open to Peer)</li>
-			<li>Singapore (Open to Peer</li>
+			<li>Singapore (Open to Peer)</li>
 		</ul>
 
 		<h2 class="mt-4 text-2xl">Peer</h2>
-		<p>We have an open peering policy. You can peer with us through Internet eXchanges that we have in common, or individually. Contact me for more information: <a href="mailto:ja@jhl.hk">ja@jhl.hk</a></p>
+		<p>We have an open peering policy. You can peer with us through Internet eXchanges that we have in common, or individually. Contact us for more information: <a href="mailto:ja@jhl.hk">ja@jhl.hk</a></p>
 
 		<h2 class="mt-4 text-2xl">Internet Exchange (IX)</h2>
 		<ul class="list-disc">
@@ -48,13 +42,6 @@
 			{#each upstream as item (item.asn)}
 				<li><a href="https://bgp.tools/as/{item.asn}" class="underline">{item.name} (AS {item.asn})</a></li>
 			{/each}
-		</ul>
-
-		<h2 class="mt-4 text-2xl">Links</h2>
-		<ul class="list-disc">
-			<li><a href="https://jhl.hk" class="underline">Profile Page</a></li>
-			<li><a href="https://article.jhl.idv.hk" class="underline">Blogs</a></li>
-			<li><a href="https://jianyuelab.org" class="underline">JianyueLab</a></li>
 		</ul>
 
 		<footer class="my-4">
