@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { Menu, X } from 'lucide-svelte';
+
+	let mobileMenuOpen = false;
+
 	const navItems = [
 		{ name: 'HOME', href: '/' },
 		{ name: 'BGP.TOOLS', href: 'https://jianyuelab.net' },
@@ -17,10 +21,45 @@
 				<img src="/logo.png" alt="" class="h-8 w-auto" />
 			</a>
 		</div>
-		<div class="top-full right-4 lg:flex lg:gap-x-12">
+
+		<!-- Desktop Navigation -->
+		<div class="hidden lg:flex lg:gap-x-12">
 			{#each navItems as item (item.href)}
 				<a href={item.href} class="text-sm/6 font-semibold">{item.name}</a>
 			{/each}
 		</div>
+
+		<!-- Mobile Menu Button -->
+		<div class="flex lg:hidden">
+			<button
+				type="button"
+				class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
+				on:click={() => (mobileMenuOpen = !mobileMenuOpen)}
+			>
+				<span class="sr-only">Open main menu</span>
+				{#if mobileMenuOpen}
+					<X class="h-6 w-6" aria-hidden="true" />
+				{:else}
+					<Menu class="h-6 w-6" aria-hidden="true" />
+				{/if}
+			</button>
+		</div>
 	</nav>
+
+	<!-- Mobile Menu -->
+	{#if mobileMenuOpen}
+		<div class="lg:hidden">
+			<div class="space-y-1 px-6 pb-6 pt-2">
+				{#each navItems as item (item.href)}
+					<a
+						href={item.href}
+						class="block rounded-lg px-3 py-2 text-base font-semibold text-amber-600 hover:bg-amber-50"
+						on:click={() => (mobileMenuOpen = false)}
+					>
+						{item.name}
+					</a>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </header>
