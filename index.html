@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>JianyueLab Ltd. Network Interactive Map</title>
+		<meta property="og:title" content="LaunchPad Network Interactive Map" />
+		<meta
+			property="og:description"
+			content="Explore LaunchPad Network's global PoPs and connections. Visualized network map with interactive PoP details."
+		/>
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://map.launchpadx.top" />
+		<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+		<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+		<script src="https://webstatic.candyrect.com/dora/lib/cr-common-platform-js/1.0.0/platform.umd.js"></script>
+		<script
+			defer
+			src="https://analyze.launchpadx.top/script.js"
+			data-website-id="f0735649-4f5a-4f11-b241-6216a7baae34"
+		></script>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family:
+					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+					sans-serif;
+				overflow: hidden;
+				background-color: black;
+			}
+
+			#map {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+			}
+
+			.header {
+				position: absolute;
+				top: 20px;
+				left: 20px;
+				background: white;
+				padding: 15px 20px;
+				border-radius: 8px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+				z-index: 2000;
+				width: 320px;
+			}
+
+			.header h1 {
+				font-size: 18px;
+				font-weight: 600;
+				color: #333;
+				margin-bottom: 5px;
+			}
+
+			.header p {
+				font-size: 12px;
+				color: #666;
+			}
+
+			.search-box {
+				position: absolute;
+				top: 105px;
+				left: 20px;
+				background: white;
+				padding: 12px 15px;
+				border-radius: 8px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+				z-index: 2000;
+				width: 320px;
+				max-height: calc(100vh - 125px);
+				overflow-y: auto;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.search-box input {
+				width: 100%;
+				padding: 8px 12px;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				font-size: 14px;
+				outline: none;
+				transition: border-color 0.2s;
+			}
+
+			.search-box input:focus {
+				border-color: #4a90e2;
+			}
+
+			.search-results {
+				margin-top: 8px;
+				max-height: 300px;
+				overflow-y: auto;
+				flex-shrink: 0;
+			}
+
+			.search-result-item {
+				padding: 10px;
+				cursor: pointer;
+				border-radius: 4px;
+				transition: background-color 0.2s;
+				font-size: 13px;
+			}
+
+			.search-result-item:hover {
+				background-color: #f5f5f5;
+			}
+
+			.search-result-item strong {
+				color: #333;
+				display: block;
+				margin-bottom: 2px;
+			}
+
+			.search-result-item span {
+				color: #666;
+				font-size: 12px;
+			}
+
+			.welcome-message {
+				margin-top: 12px;
+				padding-top: 12px;
+				border-top: 1px solid #e0e0e0;
+			}
+
+			.welcome-title {
+				font-weight: 600;
+				font-size: 14px;
+				color: #333;
+				margin-bottom: 8px;
+			}
+
+			.welcome-description {
+				font-size: 12px;
+				color: #666;
+				line-height: 1.5;
+			}
+
+			.welcome-stats {
+				display: flex;
+				gap: 12px;
+				margin-top: 8px;
+				margin-bottom: 8px;
+				align-items: center;
+			}
+
+			.welcome-stat-item {
+				background: #f7f9fb;
+				padding: 10px 12px;
+				border-radius: 8px;
+				text-align: center;
+				width: 100%;
+			}
+
+			.welcome-stat-number {
+				font-size: 20px;
+				font-weight: 700;
+				color: #222;
+				margin-bottom: 4px;
+			}
+
+			.welcome-stat-label {
+				font-size: 12px;
+				color: #666;
+			}
+
+			.pop-detail {
+				margin-top: 12px;
+				padding-top: 12px;
+				border-top: 1px solid #e0e0e0;
+				flex-shrink: 1;
+				min-height: 0;
+				overflow-y: auto;
+			}
+
+			.pop-detail-title {
+				font-weight: 600;
+				font-size: 14px;
+				color: #333;
+				margin-bottom: 4px;
+			}
+
+			.pop-detail-location {
+				font-size: 12px;
+				color: #666;
+				margin-bottom: 12px;
+			}
+
+			.connections-title,
+			.services-title {
+				font-weight: 600;
+				font-size: 12px;
+				color: #333;
+				margin-bottom: 8px;
+				background: white;
+				padding-bottom: 4px;
+			}
+
+			.services-box {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+				margin-bottom: 12px;
+			}
+
+			.connections-list {
+				max-height: 300px;
+				overflow-y: auto;
+			}
+
+			.connection-item {
+				padding: 8px;
+				cursor: pointer;
+				border-radius: 4px;
+				transition: background-color 0.2s;
+				font-size: 12px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 4px;
+			}
+
+			.connection-item:hover {
+				background-color: #f5f5f5;
+			}
+
+			.connection-item-name {
+				color: #333;
+			}
+
+			.connection-item-latency {
+				color: #666;
+				font-size: 11px;
+			}
+
+			.notice-banner {
+				position: absolute;
+				bottom: 20px;
+				left: 50%;
+				transform: translateX(-50%);
+				background: rgba(255, 255, 255, 0.9);
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+				padding: 12px 16px;
+				border-radius: 8px;
+				z-index: 2000;
+				max-width: 600px;
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+			}
+
+			.notice-content {
+				flex: 1;
+			}
+
+			.notice-title {
+				font-weight: 600;
+				font-size: 12px;
+				color: #333;
+				margin-bottom: 4px;
+			}
+
+			.notice-text {
+				font-size: 11px;
+				color: #666;
+				line-height: 1.4;
+			}
+
+			.notice-dismiss {
+				background: #4a90e2;
+				color: white;
+				border: none;
+				padding: 6px 12px;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 11px;
+				font-weight: 500;
+				white-space: nowrap;
+				transition: background-color 0.2s;
+			}
+
+			.notice-dismiss:hover {
+				background: #357abd;
+			}
+
+			.menu-button {
+				display: none;
+				position: fixed;
+				top: 12px;
+				left: 12px;
+				background: #4a90e2;
+				color: white;
+				border: none;
+				width: 40px;
+				height: 40px;
+				border-radius: 8px;
+				cursor: pointer;
+				z-index: 3000;
+				font-size: 18px;
+				line-height: 1;
+			}
+
+			.services-tag {
+				display: inline-block;
+				padding: 4px 10px;
+				border-radius: 12px;
+				color: #ffffff;
+				font-size: 12px;
+				font-weight: 500;
+				line-height: 1;
+			}
+
+			@media (max-width: 768px) {
+				/* hide header by default on mobile; show it when panel is open (class .panel-open) */
+				.header {
+					display: none;
+				}
+
+				.header.panel-open {
+					display: block;
+					position: fixed;
+					top: 70px;
+					left: 10px;
+					background: white;
+					padding: 12px 15px;
+					border-radius: 8px;
+					box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+					z-index: 3001;
+					width: 320px;
+				}
+
+				.header h1 {
+					font-size: 14px;
+				}
+
+				.header p {
+					font-size: 10px;
+				}
+
+				.menu-button {
+					display: block;
+				}
+
+				.search-box {
+					display: none;
+					position: fixed;
+					top: 138px;
+					left: 10px;
+					width: 320px;
+					max-width: calc(100% - 20px);
+					max-height: 70vh;
+					padding: 12px;
+					z-index: 3000;
+					border-radius: 8px;
+					box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+					transition:
+						transform 0.28s ease,
+						opacity 0.28s ease;
+					transform: translateY(-8px);
+					opacity: 0;
+					overflow-y: auto;
+				}
+
+				.search-box.open {
+					display: flex;
+					flex-direction: column;
+					transform: translateY(0);
+					opacity: 1;
+				}
+
+				.search-box input {
+					font-size: 12px;
+					padding: 6px 10px;
+				}
+
+				.search-results {
+					max-height: 250px;
+				}
+
+				.pop-detail {
+					font-size: 12px;
+				}
+
+				.welcome-message {
+					font-size: 12px;
+				}
+
+				.notice-banner {
+					bottom: 10px;
+					left: 10px;
+					right: 10px;
+					transform: none;
+					max-width: none;
+					flex-direction: column;
+					gap: 8px;
+				}
+
+				.notice-dismiss {
+					width: 100%;
+				}
+			}
+
+			.mapboxgl-ctrl-logo,
+			.mapboxgl-ctrl-attrib {
+				display: none !important;
+			}
+
+			.mapboxgl-popup-content {
+				padding: 12px 15px;
+				border-radius: 8px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+			}
+
+			.popup-title {
+				font-weight: 600;
+				font-size: 14px;
+				margin-bottom: 5px;
+				color: #333;
+			}
+
+			.popup-info {
+				font-size: 12px;
+				color: #666;
+			}
+
+			.mini-tooltip {
+				position: absolute;
+				z-index: 4000;
+				background: rgba(255, 255, 255, 0.95);
+				color: #222;
+				padding: 6px 10px;
+				border-radius: 6px;
+				box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+				font-size: 13px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				pointer-events: auto;
+				white-space: nowrap;
+			}
+			.mini-tooltip .mini-tooltip-id {
+				font-weight: 700;
+			}
+
+			.latency-label {
+				background: rgba(255, 255, 255, 0.95);
+				padding: 4px 8px;
+				border-radius: 6px;
+				font-size: 11px;
+				font-weight: 600;
+				color: #333;
+				box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+				white-space: nowrap;
+				pointer-events: none;
+			}
+
+			/* Lite mode hides side UI and popups for embedding */
+			.lite-mode .header,
+			.lite-mode .search-box,
+			.lite-mode .menu-button,
+			.lite-mode .notice-banner {
+				display: none !important;
+			}
+			.lite-mode .mapboxgl-popup,
+			.lite-mode .mapboxgl-popup-content {
+				display: none !important;
+			}
+
+			@keyframes pulse {
+				0% {
+					transform: scale(0);
+					opacity: 1;
+				}
+				100% {
+					transform: scale(1);
+					opacity: 0;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- --
+		<div class="header">
+			<h1>LaunchPad Network / AS214955</h1>
+			<p>Interactive Network Map</p>
+		</div>
+		-->
+
+		<button id="menuToggle" class="menu-button" aria-label="Toggle menu" aria-expanded="false">
+			☰
+		</button>
+
+		<div class="search-box">
+			<input type="text" id="searchInput" placeholder="Find PoP..." />
+			<div class="search-results" id="searchResults"></div>
+			<div class="welcome-message" id="welcomeMessage">
+				<div class="welcome-title">Welcome to LaunchPad Network Map</div>
+				<div class="welcome-stats" id="welcomeStats">
+					<div class="welcome-stat-item">
+						<div class="welcome-stat-number">...</div>
+						<div class="welcome-stat-label">Global PoPs</div>
+					</div>
+					<div class="welcome-stat-item">
+						<div class="welcome-stat-number">...</div>
+						<div class="welcome-stat-label">Connections</div>
+					</div>
+				</div>
+				<div class="welcome-description">
+					Click on any PoP to explore our global network infrastructure and view detailed live
+					connections.
+				</div>
+			</div>
+			<div class="pop-detail" id="popDetail" style="display: none"></div>
+		</div>
+
+		<div class="notice-banner" id="noticeBanner" style="display: none">
+			<div class="notice-content">
+				<div class="notice-title">Notice</div>
+				<div class="notice-text">
+					The network data on this site (e.g., connections, latency) is for visualization purposes
+					only and does not represent real-time, accurate data. This website is under construction.
+					Thank you for your understanding.
+				</div>
+			</div>
+			<button class="notice-dismiss" id="noticeDismiss">Acknowledge</button>
+		</div>
+
+		<div id="map"></div>
+
+		<script>
+			const dataVersion = '2025.12.07.01';
+			mapboxgl.accessToken =
+				'pk.eyJ1IjoibGF1bmNocGFkeCIsImEiOiJjbWdtMGZtMjUwcDZ1MndwcndoeDY4cXU5In0.dCxLhr4j1zclw-gS7Lh4uA';
+
+			const platformInfo = CandyPlatform.getDeviceInfo();
+
+			const isLite = new URLSearchParams(window.location.search).get('lite') === '1';
+			if (isLite) {
+				try {
+					document.body.classList.add('lite-mode');
+				} catch (e) {
+					/* ignore if DOM not ready */
+				}
+			}
+
+			const postMessageOrigin = new URLSearchParams(window.location.search).get('msg_origin');
+
+			let nodes = [];
+			let connections = [];
+			let map;
+			let selectedPop = null;
+			let markers = {};
+			let connectionLayers = [];
+			let packetAnimations = [];
+
+			let miniTooltipEl = null;
+			let tooltipClosedFor = null;
+
+			function ensureMiniTooltip() {
+				if (miniTooltipEl) return miniTooltipEl;
+				miniTooltipEl = document.createElement('div');
+				miniTooltipEl.class = 'mini-tooltip';
+				miniTooltipEl.style.display = 'none';
+				miniTooltipEl.innerHTML = `<div class="mini-tooltip-id"></div>`;
+				document.body.appendChild(miniTooltipEl);
+				return miniTooltipEl;
+			}
+
+			function showMiniTooltip(node, lngLat) {
+				if (!map) return;
+				if (!node) return;
+				// Respect user's explicit close action for this PoP until mouse leaves marker
+				if (tooltipClosedFor === node.id) return;
+
+				const el = ensureMiniTooltip();
+				el.querySelector('.mini-tooltip-id').textContent = node.id;
+				// convert geo to pixel
+				const p = map.project([
+					parseFloat(lngLat.lng || lngLat[0]),
+					parseFloat(lngLat.lat || lngLat[1])
+				]);
+				// place tooltip slightly above and to the right of the marker
+				const offsetX = 12;
+				const offsetY = -40;
+				el.style.left = `${p.x + offsetX}px`;
+				el.style.top = `${p.y + offsetY}px`;
+				el.style.display = 'flex';
+			}
+
+			function hideMiniTooltip() {
+				if (!miniTooltipEl) return;
+				miniTooltipEl.style.display = 'none';
+			}
+
+			function generateServicesTagHTML(tagString) {
+				const tags = tagString
+					.split(';')
+					.map((t) => t.trim())
+					.filter(Boolean);
+
+				function hashToColor(str) {
+					let hash = 0;
+					for (let i = 0; i < str.length; i++) {
+						hash = str.charCodeAt(i) + ((hash << 5) - hash);
+					}
+					const r = (hash >> 16) & 0xff;
+					const g = (hash >> 8) & 0xff;
+					const b = hash & 0xff;
+					return [Math.abs(r), Math.abs(g), Math.abs(b)];
+				}
+
+				function rgbToHsl(r, g, b) {
+					r /= 255;
+					g /= 255;
+					b /= 255;
+					const max = Math.max(r, g, b),
+						min = Math.min(r, g, b);
+					let h,
+						s,
+						l = (max + min) / 2;
+
+					if (max === min) {
+						h = s = 0;
+					} else {
+						const d = max - min;
+						s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+						switch (max) {
+							case r:
+								h = (g - b) / d + (g < b ? 6 : 0);
+								break;
+							case g:
+								h = (b - r) / d + 2;
+								break;
+							case b:
+								h = (r - g) / d + 4;
+								break;
+						}
+						h /= 6;
+					}
+					return [h * 360, s, l];
+				}
+
+				function adjustBrightness(r, g, b) {
+					let [h, s, l] = rgbToHsl(r, g, b);
+
+					s = Math.min(1, s + 0.25);
+					l = Math.min(0.45, l);
+
+					function hslToRgb(h, s, l) {
+						let r, g, b;
+
+						function hue2rgb(p, q, t) {
+							if (t < 0) t += 1;
+							if (t > 1) t -= 1;
+							if (t < 1 / 6) return p + (q - p) * 6 * t;
+							if (t < 1 / 2) return q;
+							if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+							return p;
+						}
+
+						h /= 360;
+
+						let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+						let p = 2 * l - q;
+
+						r = hue2rgb(p, q, h + 1 / 3);
+						g = hue2rgb(p, q, h);
+						b = hue2rgb(p, q, h - 1 / 3);
+
+						return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+					}
+
+					return hslToRgb(h, s, l);
+				}
+
+				const html = tags
+					.map((tag) => {
+						let [r, g, b] = hashToColor(tag);
+						[r, g, b] = adjustBrightness(r, g, b);
+						const color = `rgb(${r}, ${g}, ${b})`;
+						return `<span class="services-tag" style="background-color: ${color};">${tag}</span>`;
+					})
+					.join('');
+
+				return html;
+			}
+
+			// Parse CSV
+			function parseCSV(text) {
+				const lines = text.trim().split('\n');
+				const headers = lines[0].split(',');
+				return lines.slice(1).map((line) => {
+					const values = line
+						.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)
+						.map((v) => v.replace(/^"|"$/g, '').trim());
+					const obj = {};
+					headers.forEach((header, i) => {
+						obj[header.trim()] = values[i];
+					});
+					return obj;
+				});
+			}
+
+			// Load CSV files
+			async function loadData() {
+				try {
+					const [nodesResponse, connectionsResponse] = await Promise.all([
+						fetch('nodes.csv?' + dataVersion),
+						fetch('connections.csv?' + dataVersion)
+					]);
+
+					const nodesText = await nodesResponse.text();
+					const connectionsText = await connectionsResponse.text();
+
+					nodes = parseCSV(nodesText);
+					connections = parseCSV(connectionsText);
+
+					console.log('Loaded nodes:', nodes);
+					console.log('Loaded connections:', connections);
+				} catch (error) {
+					console.error('Error loading data:', error);
+				}
+			}
+
+			// Initialize map
+			function initMap() {
+				map = new mapboxgl.Map({
+					container: 'map',
+					style: 'mapbox://styles/mapbox/dark-v11',
+					center: [100, 30],
+					zoom: 2
+				});
+
+				map.on('load', () => {
+					renderConnections();
+					renderNodes();
+					if (!isLite) handleURLHash();
+				});
+
+				// Click on map to deselect
+				map.on('click', (e) => {
+					if (isLite) return;
+					// If mobile and panel open, close it to show more map area
+					// if (window.innerWidth <= 768 && searchBox.classList.contains('open')) {
+					//     closeSearchBox();
+					//     return;
+					// }
+					// Check if click is on empty space (not on a marker)
+					const clickedOnMarker = e.originalEvent.target.closest('.mapboxgl-marker');
+					if (!clickedOnMarker && selectedPop) {
+						selectPop(null);
+					}
+				});
+			}
+
+			// Get midpoint of a line
+			function getMidpoint(lon1, lat1, lon2, lat2) {
+				return [(lon1 + lon2) / 2, (lat1 + lat2) / 2];
+			}
+
+			// Normalize longitude in degrees to [-180, 180]
+			function normalizeLonDeg(lon) {
+				let v = lon;
+				// wrap into [-180,180)
+				v = ((((v + 180) % 360) + 360) % 360) - 180;
+				// handle edge case when v === -180 convert to 180 for consistency (optional)
+				if (v === -180) return 180;
+				return v;
+			}
+
+			// Ensure longitude sequence is continuous (unwrap across dateline)
+			// This prevents Mapbox drawing long "wrap-around" segments that look like a circle.
+			function unwrapLongitudes(coords) {
+				if (!coords || coords.length === 0) return coords;
+				const out = [];
+				let base = coords[0][0]; // use first point as reference
+				out.push([base, coords[0][1]]);
+				for (let i = 1; i < coords.length; i++) {
+					let lon = coords[i][0];
+					// shift lon so it's continuous with base
+					while (lon - base > 180) lon -= 360;
+					while (lon - base < -180) lon += 360;
+					out.push([lon, coords[i][1]]);
+					base = lon;
+				}
+				return out;
+			}
+
+			// Rhumb (loxodrome) interpolation using Mercator y for latitude to avoid polar wrap
+			function rhumbInterpolate(lon1, lat1, lon2, lat2, segments) {
+				// work in degrees, but convert lat to Mercator Y
+				const toRad = Math.PI / 180;
+				const toDeg = 180 / Math.PI;
+
+				// shortest longitude delta
+				let deltaLon = lon2 - lon1;
+				if (deltaLon > 180) deltaLon -= 360;
+				if (deltaLon < -180) deltaLon += 360;
+
+				// mercator y
+				function latToY(lat) {
+					const φ = lat * toRad;
+					return Math.log(Math.tan(Math.PI / 4 + φ / 2));
+				}
+				function yToLat(y) {
+					return (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * toDeg;
+				}
+
+				const y1 = latToY(lat1);
+				const y2 = latToY(lat2);
+
+				const coords = [];
+				for (let i = 0; i <= segments; i++) {
+					const f = i / segments;
+					const lon = normalizeLonDeg(lon1 + deltaLon * f);
+					const y = y1 + (y2 - y1) * f;
+					const lat = yToLat(y);
+					coords.push([lon, lat]);
+				}
+				return coords;
+			}
+
+			// Add great-circle / spherical interpolation to produce multiple coordinates along the path.
+			// Fallback to rhumbInterpolate when path is near-antipodal or may go over the pole to avoid visual loops.
+			function interpolateGreatCircle(lon1, lat1, lon2, lat2, maxSegments = 128) {
+				const toRad = Math.PI / 180;
+				const toDeg = 180 / Math.PI;
+				const φ1 = lat1 * toRad,
+					λ1 = lon1 * toRad;
+				const φ2 = lat2 * toRad,
+					λ2 = lon2 * toRad;
+
+				// normalize delta longitude to [-PI, PI] to ensure shortest path
+				let Δλ = λ2 - λ1;
+				if (Δλ > Math.PI) Δλ -= 2 * Math.PI;
+				else if (Δλ < -Math.PI) Δλ += 2 * Math.PI;
+
+				const sinφ1 = Math.sin(φ1),
+					sinφ2 = Math.sin(φ2);
+				const cosφ1 = Math.cos(φ1),
+					cosφ2 = Math.cos(φ2);
+				// angular distance using normalized Δλ (clamped for numerical safety)
+				let cosD = sinφ1 * sinφ2 + cosφ1 * cosφ2 * Math.cos(Δλ);
+				cosD = Math.min(1, Math.max(-1, cosD));
+				const d = Math.acos(cosD);
+
+				// If points are essentially identical, return endpoints normalized
+				if (!isFinite(d) || d === 0) {
+					return [
+						[normalizeLonDeg(lon1), lat1],
+						[normalizeLonDeg(lon2), lat2]
+					];
+				}
+
+				// If angular distance is very close to PI (antipodal-ish) or extremely large,
+				// great-circle interpolation may cross poles and produce visual loops.
+				// Use rhumb (Mercator-based) interpolation as a stable fallback.
+				const ANTIPODAL_THRESHOLD = Math.PI * 0.98; // ~176 degrees
+				if (d >= ANTIPODAL_THRESHOLD) {
+					const degrees = d * toDeg;
+					const segments = Math.min(maxSegments, Math.max(6, Math.ceil(degrees * 2)));
+					return rhumbInterpolate(
+						normalizeLonDeg(lon1),
+						lat1,
+						normalizeLonDeg(lon2),
+						lat2,
+						segments
+					);
+				}
+
+				// otherwise perform great-circle interpolation
+				const degrees = d * toDeg;
+				const segments = Math.min(maxSegments, Math.max(6, Math.ceil(degrees * 2)));
+				const coords = [];
+
+				for (let i = 0; i <= segments; i++) {
+					const f = i / segments;
+					const A = Math.sin((1 - f) * d) / Math.sin(d);
+					const B = Math.sin(f * d) / Math.sin(d);
+
+					const x = A * cosφ1 * Math.cos(λ1) + B * cosφ2 * Math.cos(λ1 + Δλ);
+					const y = A * cosφ1 * Math.sin(λ1) + B * cosφ2 * Math.sin(λ1 + Δλ);
+					const z = A * sinφ1 + B * sinφ2;
+
+					const φi = Math.atan2(z, Math.sqrt(x * x + y * y));
+					const λi = Math.atan2(y, x);
+
+					coords.push([normalizeLonDeg(λi * toDeg), φi * toDeg]);
+				}
+				return coords;
+			}
+
+			// Render connections (restore/ensure present)
+			function renderConnections() {
+				// Remove existing connection layers and sources
+				connectionLayers.forEach((layerId) => {
+					if (map.getLayer(layerId)) map.removeLayer(layerId);
+					if (map.getSource(layerId)) map.removeSource(layerId);
+				});
+				connectionLayers = [];
+
+				// Remove latency markers
+				document.querySelectorAll('.latency-marker').forEach((el) => el.remove());
+
+				const connectionsToShow = selectedPop
+					? connections.filter((c) => c.source_id === selectedPop)
+					: connections;
+
+				connectionsToShow.forEach((conn, index) => {
+					const sourceNode = nodes.find((n) => n.id === conn.source_id);
+					const targetNode = nodes.find((n) => n.id === conn.target_id);
+					if (!sourceNode || !targetNode) return;
+
+					const layerId = `connection-${index}`;
+					connectionLayers.push(layerId);
+
+					const srcLon = parseFloat(sourceNode.lon);
+					const srcLat = parseFloat(sourceNode.lat);
+					const tgtLon = parseFloat(targetNode.lon);
+					const tgtLat = parseFloat(targetNode.lat);
+
+					// Build interpolated polyline (may produce longitudes in [-180,180])
+					const rawCoords = interpolateGreatCircle(srcLon, srcLat, tgtLon, tgtLat);
+
+					// Unwrap longitudes to produce a continuous sequence across dateline
+					const lineCoords = unwrapLongitudes(rawCoords);
+
+					map.addSource(layerId, {
+						type: 'geojson',
+						data: {
+							type: 'Feature',
+							geometry: {
+								type: 'LineString',
+								coordinates: lineCoords
+							}
+						}
+					});
+
+					map.addLayer({
+						id: layerId,
+						type: 'line',
+						source: layerId,
+						paint: {
+							'line-color': selectedPop ? '#E74C3C' : '#4A90E2',
+							'line-width': selectedPop ? 2 : 1,
+							'line-opacity': selectedPop ? 0.8 : 0.4
+						}
+					});
+
+					// latency label at polyline midpoint when PoP selected
+					if (selectedPop) {
+						const midIndex = Math.floor(lineCoords.length / 2);
+						const midpoint = lineCoords[midIndex];
+
+						const latencyEl = document.createElement('div');
+						latencyEl.class = 'latency-label latency-marker';
+						latencyEl.textContent = `${conn.latency}ms`;
+
+						// Normalize longitude for marker placement (visual position equivalent)
+						new mapboxgl.Marker({ element: latencyEl, anchor: 'center' })
+							.setLngLat([normalizeLonDeg(midpoint[0]), midpoint[1]])
+							.addTo(map);
+					}
+				});
+
+				if (selectedPop) animatePackets();
+				else clearPacketAnimations();
+			}
+
+			// Clear packet animations
+			function clearPacketAnimations() {
+				packetAnimations.forEach((anim) => {
+					if (anim && anim.stop) {
+						// custom stop function if provided
+						try {
+							anim.stop();
+						} catch (e) {
+							/* ignore */
+						}
+					} else {
+						clearInterval(anim);
+					}
+				});
+				packetAnimations = [];
+				document.querySelectorAll('.packet-marker').forEach((el) => el.remove());
+			}
+
+			// Helper to animate marker along coords with dateline-safe longitude interpolation
+			function animateMarkerAlongCoords(marker, coords, speed = 0.008) {
+				let progress = 0;
+				let stopped = false;
+				const tickMs = 30;
+
+				function interpLng(aLng, bLng, t) {
+					// coords may be unwrapped (continuous), so simple linear interp keeps continuity.
+					const lng = aLng + (bLng - aLng) * t;
+					return lng; // do NOT normalize here to preserve continuous path; Mapbox accepts wrapped values
+				}
+
+				function step() {
+					if (stopped) return;
+					progress += speed;
+					if (progress > 1) progress = 0;
+
+					const total = coords.length - 1;
+					const exactIndex = progress * total;
+					const i = Math.floor(exactIndex);
+					const frac = exactIndex - i;
+
+					const a = coords[i];
+					const b = coords[Math.min(i + 1, total)];
+
+					// interpolate using unwrapped longitudes to avoid dateline jumps
+					const lng = interpLng(a[0], b[0], frac);
+					const lat = a[1] + (b[1] - a[1]) * frac;
+
+					// normalize only when setting marker so Mapbox places it correctly
+					marker.setLngLat([normalizeLonDeg(lng), lat]);
+				}
+
+				const id = setInterval(step, tickMs);
+				return {
+					stop() {
+						stopped = true;
+						clearInterval(id);
+					}
+				};
+			}
+
+			// Animate packets along the same interpolated polyline
+			function animatePackets() {
+				clearPacketAnimations();
+				const sourceNode = nodes.find((n) => n.id === selectedPop);
+				if (!sourceNode) return;
+
+				connections
+					.filter((c) => c.source_id === selectedPop)
+					.forEach((conn) => {
+						const targetNode = nodes.find((n) => n.id === conn.target_id);
+						if (!targetNode) return;
+
+						// Build the same interpolated coordinates then unwrap longitudes
+						const rawCoords = interpolateGreatCircle(
+							parseFloat(sourceNode.lon),
+							parseFloat(sourceNode.lat),
+							parseFloat(targetNode.lon),
+							parseFloat(targetNode.lat)
+						);
+						const coords = unwrapLongitudes(rawCoords);
+
+						// Create packet element
+						const packetEl = document.createElement('div');
+						packetEl.class = 'packet-marker';
+						packetEl.style.width = '8px';
+						packetEl.style.height = '8px';
+						packetEl.style.borderRadius = '50%';
+						packetEl.style.backgroundColor = '#E74C3C';
+						packetEl.style.boxShadow = '0 0 10px rgba(231, 76, 60, 0.8)';
+
+						const packetMarker = new mapboxgl.Marker({
+							element: packetEl,
+							anchor: 'center'
+						})
+							// initial lon normalized for placement
+							.setLngLat([normalizeLonDeg(coords[0][0]), coords[0][1]])
+							.addTo(map);
+
+						const latency = Number(conn.latency) || 100;
+						const clamped = Math.max(5, Math.min(500, latency));
+						const speed = 0.025 - ((clamped - 5) / (500 - 5)) * (0.025 - 0.004);
+
+						const controller = animateMarkerAlongCoords(packetMarker, coords, speed);
+						packetAnimations.push(controller);
+					});
+			}
+
+			// Render nodes
+			function renderNodes() {
+				// Clear existing markers
+				Object.values(markers).forEach((marker) => marker.remove());
+				markers = {};
+
+				nodes.forEach((node) => {
+					const el = document.createElement('div');
+					el.style.width = '40px';
+					el.style.height = '40px';
+					el.style.pointerEvents = 'auto';
+					el.style.display = 'flex';
+					el.style.alignItems = 'center';
+					el.style.justifyContent = 'center';
+					el.style.cursor = 'pointer';
+					// Set z-index based on connection count for priority
+					const connectionCount = connections.filter((c) => c.source_id === node.id).length;
+					el.style.zIndex = String(1000 + connectionCount);
+
+					const dot = document.createElement('div');
+					dot.style.width = '16px';
+					dot.style.height = '16px';
+					dot.style.borderRadius = '50%';
+					dot.style.backgroundColor = selectedPop === node.id ? '#E74C3C' : '#4A90E2';
+					dot.style.border = '2px solid white';
+					dot.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+					dot.style.transition = 'transform 0.2s';
+
+					el.addEventListener('mouseenter', () => {
+						dot.style.transform = 'scale(1.3)';
+					});
+
+					el.addEventListener('mouseleave', () => {
+						dot.style.transform = 'scale(1)';
+					});
+
+					el.appendChild(dot);
+
+					const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+						.setLngLat([parseFloat(node.lon), parseFloat(node.lat)])
+						.addTo(map);
+
+					if (platformInfo.isDesktop) {
+						el.addEventListener('mouseenter', () => {
+							if (tooltipClosedFor === node.id) return;
+							showMiniTooltip(node, marker.getLngLat());
+						});
+						el.addEventListener('mouseleave', () => {
+							hideMiniTooltip();
+							if (tooltipClosedFor === node.id) tooltipClosedFor = null;
+						});
+					} else {
+						const mobilePopup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+                            <div class="popup-title">${node.id}</div>
+                            <div class="popup-info">${node.name}</div>
+                        `);
+						marker.setPopup(mobilePopup);
+					}
+
+					el.addEventListener('click', () => {
+						selectPop(node.id);
+					});
+
+					markers[node.id] = marker;
+				});
+			}
+
+			// Select PoP
+			function selectPop(popId) {
+				if (isLite) {
+					if (postMessageOrigin) {
+						window.parent.postMessage({ type: 'selectPop', popId: popId }, postMessageOrigin);
+					}
+					return;
+				}
+
+				if (selectedPop === popId || popId === null) {
+					selectedPop = null;
+					history.replaceState(null, '', window.location.pathname + window.location.search);
+					hidePopDetail();
+					showWelcomeMessage();
+					clearPacketAnimations();
+					document.getElementById('searchInput').value = '';
+					document.getElementById('searchResults').innerHTML = '';
+				} else {
+					selectedPop = popId;
+					history.replaceState(
+						null,
+						'',
+						window.location.pathname + window.location.search + '#' + popId
+					);
+					hideWelcomeMessage();
+					showPopDetail(popId);
+
+					// Fly to selected PoP
+					const node = nodes.find((n) => n.id === popId);
+					if (node) {
+						map.flyTo({
+							center: [parseFloat(node.lon), parseFloat(node.lat)],
+							zoom: 3.8,
+							duration: 1500
+						});
+					}
+				}
+
+				renderConnections();
+				renderNodes();
+			}
+
+			// Compute and update welcome stats (deduplicate connections: treat A-B and B-A as same)
+			function computeStats() {
+				// nodes and connections are populated by loadData()
+				const totalPops = Array.isArray(nodes) ? nodes.length : 0;
+
+				const uniquePairs = new Set();
+				if (Array.isArray(connections)) {
+					connections.forEach((c) => {
+						const a = c.source_id;
+						const b = c.target_id;
+						if (!a || !b) return;
+						if (a === b) return; // ignore self connections
+						const key = [a, b].sort().join('::'); // sorted to dedupe direction
+						uniquePairs.add(key);
+					});
+				}
+
+				const totalConnections = uniquePairs.size;
+
+				const statsEl = document.getElementById('welcomeStats');
+				if (statsEl) {
+					statsEl.innerHTML = `
+                    <div class="welcome-stat-item">
+                        <div class="welcome-stat-number">${totalPops}</div>
+                        <div class="welcome-stat-label">Global PoPs</div>
+                    </div>
+                    <div class="welcome-stat-item">
+                        <div class="welcome-stat-number">${totalConnections}</div>
+                        <div class="welcome-stat-label">Connections</div>
+                    </div>
+                `;
+				}
+			}
+
+			// Show PoP detail
+			function showPopDetail(popId) {
+				const node = nodes.find((n) => n.id === popId);
+				if (!node) return;
+
+				const popConnections = connections
+					.filter((c) => c.source_id === popId)
+					.sort((a, b) => a.latency - b.latency);
+
+				const popDetailEl = document.getElementById('popDetail');
+				const searchInput = document.getElementById('searchInput');
+				const searchResults = document.getElementById('searchResults');
+
+				searchInput.value = '';
+				searchResults.innerHTML = '';
+
+				let html = `
+                <div class="pop-detail-title">${node.id}</div>
+                <div class="pop-detail-location">${node.name}</div>
+            `;
+
+				if (popConnections.length > 0) {
+					if (node.services) {
+						html += '<div class="services-title">Services</div>';
+						html += `<div class="services-box">${generateServicesTagHTML(node.services)}</div>`;
+					}
+					html += '<div class="connections-title">Connections</div>';
+					html += '<div class="connections-list">';
+					popConnections.forEach((conn) => {
+						const targetNode = nodes.find((n) => n.id === conn.target_id);
+						if (targetNode) {
+							html += `
+                            <div class="connection-item" data-pop-id="${conn.target_id}">
+                                <span class="connection-item-name">${targetNode.id}</span>
+                                <span class="connection-item-latency">${conn.latency}ms</span>
+                            </div>
+                        `;
+						}
+					});
+					html += '</div>';
+				}
+
+				popDetailEl.innerHTML = html;
+				popDetailEl.style.display = 'block';
+
+				// Add click handlers to connection items
+				popDetailEl.querySelectorAll('.connection-item').forEach((item) => {
+					item.addEventListener('click', () => {
+						const targetPopId = item.getAttribute('data-pop-id');
+						selectPop(targetPopId);
+					});
+				});
+			}
+
+			// Hide PoP detail
+			function hidePopDetail() {
+				const popDetailEl = document.getElementById('popDetail');
+				popDetailEl.style.display = 'none';
+				popDetailEl.innerHTML = '';
+			}
+
+			// Show welcome message (when no PoP selected)
+			function showWelcomeMessage() {
+				const welcomeEl = document.getElementById('welcomeMessage');
+				welcomeEl.style.display = 'block';
+			}
+
+			// Hide welcome message
+			function hideWelcomeMessage() {
+				const welcomeEl = document.getElementById('welcomeMessage');
+				welcomeEl.style.display = 'none';
+			}
+
+			// Handle URL hash
+			function handleURLHash() {
+				const hash = window.location.hash.substring(1);
+				if (hash && nodes.find((n) => n.id === hash)) {
+					selectPop(hash);
+				}
+			}
+
+			window.addEventListener('hashchange', handleURLHash);
+
+			// Search functionality
+			const searchInput = document.getElementById('searchInput');
+			const searchResults = document.getElementById('searchResults');
+
+			if (!isLite) {
+				searchInput.addEventListener('input', (e) => {
+					const query = e.target.value.toLowerCase();
+					searchResults.innerHTML = '';
+
+					// Hide pop detail when searching
+					if (query.length > 0) {
+						hidePopDetail();
+					} else if (selectedPop) {
+						showPopDetail(selectedPop);
+						return;
+					}
+
+					if (query.length === 0) {
+						if (document.getElementById('popDetail').children.length == 0) {
+							showWelcomeMessage();
+						}
+
+						return;
+					}
+
+					const filtered = nodes.filter(
+						(node) =>
+							node.id.toLowerCase().includes(query) || node.name.toLowerCase().includes(query)
+					);
+
+					filtered.forEach((node) => {
+						const div = document.createElement('div');
+						div.class = 'search-result-item';
+						div.innerHTML = `
+                        <strong>${node.id}</strong>
+                        <span>${node.name}</span>
+                    `;
+						div.addEventListener('click', () => {
+							selectPop(node.id);
+						});
+						searchResults.appendChild(div);
+					});
+
+					hideWelcomeMessage();
+				});
+			} else {
+				if (searchInput) searchInput.disabled = true;
+				if (searchResults) searchResults.innerHTML = '';
+			}
+
+			// Notice banner management
+			function checkNoticeAcknowledgement() {
+				const acknowledged = localStorage.getItem('networkMapNoticeAcknowledged');
+				if (!acknowledged) {
+					document.getElementById('noticeBanner').style.display = 'flex';
+				}
+			}
+
+			document.getElementById('noticeDismiss').addEventListener('click', () => {
+				localStorage.setItem('networkMapNoticeAcknowledged', 'true');
+				document.getElementById('noticeBanner').style.display = 'none';
+			});
+
+			// Toggle search-box on mobile
+			const menuToggle = document.getElementById('menuToggle');
+			const searchBox = document.querySelector('.search-box');
+			const searchInputEl = document.getElementById('searchInput');
+			const headerEl = document.querySelector('.header');
+
+			function openSearchBox() {
+				searchBox.classList.add('open');
+				menuToggle.setAttribute('aria-expanded', 'true');
+				// show header as part of the side panel on mobile
+				headerEl && headerEl.classList.add('panel-open');
+				// focus input
+				setTimeout(() => searchInputEl.focus(), 50);
+			}
+
+			function closeSearchBox() {
+				searchBox.classList.remove('open');
+				menuToggle.setAttribute('aria-expanded', 'false');
+				// hide header on mobile when panel closes
+				headerEl && headerEl.classList.remove('panel-open');
+			}
+
+			if (!isLite) {
+				menuToggle &&
+					menuToggle.addEventListener('click', (e) => {
+						e.stopPropagation();
+						if (searchBox.classList.contains('open')) {
+							closeSearchBox();
+						} else {
+							openSearchBox();
+						}
+					});
+			}
+
+			// Initialize
+			(async () => {
+				await loadData();
+				// Update stats once data loaded
+				computeStats();
+				initMap();
+				if (!isLite) checkNoticeAcknowledgement();
+				if (window.innerWidth <= 768 && !isLite) {
+					openSearchBox();
+				}
+			})();
+		</script>
+	</body>
+</html>
